@@ -1,3 +1,5 @@
 *.iso
 *.o
 *.elf
+*.swp
+bochslog.txt
