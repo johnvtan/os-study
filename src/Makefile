@@ -6,10 +6,10 @@ ASFLAGS=-felf32
 all: $(SOURCES) link
 
 clean:
-	rm *.o kernel
+	rm *.o kernel.elf
 
 link:
-	ld $(LDFLAGS) -o kernel $(SOURCES)
+	ld $(LDFLAGS) -o kernel.elf $(SOURCES)
 
 .s.o:
 	nasm $(ASFLAGS) $<
