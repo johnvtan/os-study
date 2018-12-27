@@ -1,37 +1,38 @@
-MBOOT_PAGE_ALIGN equ 1<<0
-MBOOT_MEM_INFO equ 1<<1
-MBOOT_HEADER_MAGIC equ 0x1BADB002
-MBOOT_HEADER_FLAGS equ MBOOT_PAGE_ALIGN | MBOOT_MEM_INFO
-MBOOT_CHECKSUM equ -(MBOOT_HEADER_MAGIC + MBOOT_HEADER_FLAGS)
+.set ALIGN, 1<< 0
+.set MEMINFO, 1<<1
+.set FLAGS, ALIGN | MEMINFO
+.set MAGIC, 0x1BADB002
+.set CHECKSUM, -(MAGIC + FLAGS)
 
-[BITS 32] ; all instructions are 32 bit
-[GLOBAL mboot] ; mboot is accessible from C
-[EXTERN code] ; start of the .text section - loaded from linker script?
-[EXTERN bss] ; start of the .bss section - loaded from linker script?
-[EXTERN end] ; end of the last loadable section
+# defines multiboot header
+.section .multiboot
+.align 4
+.long MAGIC
+.long FLAGS
+.long CHECKSUM
 
-mboot:
-; this is the multiboot header for grub, which specifies the environment for the kernel when it boots and allows the
-; kernel to query the environment its in
-; this header must be in the first 4Kb of the kernel
-; dd is an NASM command that lets us put constants at specific memory locations
-    dd MBOOT_HEADER_MAGIC ; GRUB will search for this value
-    dd MBOOT_HEADER_FLAGS ; tells grub how to load the file
-    dd MBOOT_CHECKSUM
+# defines location and size of the stack
+.section .bss
+.align 16
+stack_bottom:
+.skip 16384 # 16 KB allocated for stack
+stack_top:
 
-    dd mboot ; location of this descriptor
-    dd code ; start of code
-    dd bss ; start of .data section
-    dd end ; end of kernel
-    dd start ; kernel entry point (initial EIP)
+# entry point to the kernel
+.section .text
+.global _start
+.type _start, @function
+_start:
+    # at this point, we're in 32 bit protected mode and ints and paging are disabled
+    # set up the stack by moving the stack_top location into esp
+    mov $stack_top, %esp
 
-[GLOBAL start]
-[EXTERN main] ; This is the entry point of our C code
+    # initialize processor state here
+    call kernel_main
 
-start:
-    push ebx ; Load multiboot header location
+    # if we return from kernel main, put computer into infinite loop
+    cli
+1:  hlt
+    jmp 1b
 
-    ; execute the kernel:
-    cli ; disable interrupts
-    call main ; call the main() function
-    jmp $ ; enter an infinite loop (stops the processor from continuing execution)
+.size _start, . - _start

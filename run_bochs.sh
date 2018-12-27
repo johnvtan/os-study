@@ -1,4 +1,2 @@
 #!/bin/bash
-sudo /sbin/losetup /dev/loop0 floppy.img
-sudo bochs -f bochsrc.txt -q
-sudo /sbin/losetup -d /dev/loop0
+bochs -f bochsrc.txt -q

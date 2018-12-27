@@ -1,15 +1,31 @@
-SOURCES=boot.o main.o
-CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -m32
-LDFLAGS=-Tlinker.ld -m elf_i386 -s
-ASFLAGS=-felf32
+PREFIX = /home/john/opt/cross/bin/
+ARCH = i686-elf
+CC = $(PREFIX)/$(ARCH)-gcc
+AS = $(PREFIX)/$(ARCH)-as
 
-all: $(SOURCES) link
+CFLAGS = -ffreestanding -Wall -Wextra
+LDFLAGS = -T linker.ld -ffreestanding -nostdlib -lgcc
+ASFLAGS =
+
+KERN_SOURCES = $(wildcard *.c)
+ASM_SOURCES = $(wildcard *.s)
+OBJS = $(patsubst %.c, %.o, $(KERN_SOURCES))
+OBJS += $(patsubst %.s, %.o, $(ASM_SOURCES))
+
+IMG_NAME = os.bin 
+
+all: build
+
+build: $(OBJS)
+	$(CC) -T linker.ld -o $(IMG_NAME) $(LDFLAGS) $(OBJS)
+	mv $(IMG_NAME) ../isodir/boot/
+	cd .. && grub-mkrescue -o myos.iso isodir
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: %.s
+	$(CC) $(ASFLAGS) -c $< -o $@
 
 clean:
-	rm *.o kernel.elf
-
-link:
-	ld $(LDFLAGS) -o kernel.elf $(SOURCES)
-
-.s.o:
-	nasm $(ASFLAGS) $<
+	rm $(OBJS)
