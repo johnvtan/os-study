@@ -1,4 +1,5 @@
 #include "vga.h"
+#include "gdt.h"
 #include "stdio.h"
 
 #if defined(__linux__)
@@ -10,6 +11,7 @@
 #endif
 
 int kernel_main(void) {
+    gdt_init();
     terminal_initialize();
     for (int i = 0; ; i++) {
         printf("num %d\n", i);
