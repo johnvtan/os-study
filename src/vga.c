@@ -65,7 +65,23 @@ static void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
 }
 
 void terminal_putc(char c) {
-    terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+    if (c == '\n') {
+        terminal_column = 0;
+        ++terminal_row;
+    } else if (c == '\r') {
+        terminal_column = 0;
+    } else if (c == 0x08 && terminal_column > 0) {
+        // backspace
+        --terminal_column;
+    }
+    else if (c == 0x9) {
+        // tab character
+        terminal_column = (terminal_column + 8) & ~(8-1);
+    }
+    else if (c >= ' ' ) {
+        // any other printable character
+        terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+    }
     if (++terminal_column == VGA_WIDTH) {
         terminal_column = 0;
         if (++terminal_row == VGA_HEIGHT) {

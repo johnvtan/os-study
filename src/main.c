@@ -10,6 +10,6 @@
 
 int kernel_main(void) {
     terminal_initialize();
-    terminal_puts("Hello, kernel world!\n");
+    terminal_puts("Hello, kernel world!\nThis is your\nmaster");
     return 0;
 }
