@@ -29,14 +29,6 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
     return (uint16_t) uc | (uint16_t) color << 8;
 }
 
-size_t strlen(const char *str) {
-    size_t len = 0;
-    while (str[len]) {
-        len++;
-    }
-    return len;
-}
-
 static size_t terminal_row;
 static size_t terminal_column;
 static uint8_t terminal_color;

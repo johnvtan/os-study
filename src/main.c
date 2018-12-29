@@ -1,4 +1,5 @@
 #include "vga.h"
+#include "stdio.h"
 
 #if defined(__linux__)
 #error "Please work"
@@ -10,6 +11,6 @@
 
 int kernel_main(void) {
     terminal_initialize();
-    terminal_puts("Hello, kernel world!\nThis is your\nmaster");
+    printf("Hello, kernel world!\nThis is your\nmaster %s %d", "this is a test string", 22);
     return 0;
 }

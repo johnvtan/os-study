@@ -22,14 +22,16 @@ dirs:
 
 build: $(OBJS)
 	$(CC) -T linker.ld -o $(IMG_NAME) $(LDFLAGS) $(OBJS)
-	mv $(IMG_NAME) ../isodir/boot/
-	cd .. && grub-mkrescue -o myos.iso isodir
 
 $(OBJ_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.s
 	$(CC) $(ASFLAGS) -c $< -o $@
+
+upload: dirs build
+	mv $(IMG_NAME) ../isodir/boot/
+	cd .. && grub-mkrescue -o myos.iso isodir
 
 clean:
 	rm -rf $(OBJ_DIR) 
