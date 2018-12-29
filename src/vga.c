@@ -2,6 +2,12 @@
 
 #define VGA_WIDTH (80)
 #define VGA_HEIGHT (25)
+#define VGA_BUFFER_ADDRESS (0xB8000)
+
+static size_t terminal_row;
+static size_t terminal_column;
+static uint8_t terminal_color;
+static uint16_t *terminal_buffer;
 
 enum vga_color {
     VGA_COLOR_BLACK = 0,
@@ -29,16 +35,11 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
     return (uint16_t) uc | (uint16_t) color << 8;
 }
 
-static size_t terminal_row;
-static size_t terminal_column;
-static uint8_t terminal_color;
-static uint16_t *terminal_buffer;
-
 void terminal_initialize(void) {
     terminal_row = 0;
     terminal_column = 0;
     terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_BLACK);
-    terminal_buffer = (uint16_t*) 0xB8000;
+    terminal_buffer = (uint16_t*) VGA_BUFFER_ADDRESS;
     for (size_t y = 0; y < VGA_HEIGHT; y++) {
         for (size_t x = 0; x < VGA_WIDTH; x++) {
             const size_t index = y * VGA_WIDTH + x;
@@ -54,6 +55,20 @@ static void terminal_setcolor(uint8_t color) {
 static void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
     const size_t index = y * VGA_WIDTH + x;
     terminal_buffer[index] = vga_entry(c, color);
+}
+
+static void terminal_scroll() {
+    if (terminal_row > VGA_HEIGHT) {
+        // copy all rows to the row above it
+        for (int i = 0; i < VGA_HEIGHT*VGA_WIDTH; i++) {
+            terminal_buffer[i] = terminal_buffer[i + 80];
+        }
+        // fill last line with spaces
+        for (int i = 0; i < 80; i++) {
+            terminal_putentryat(' ', terminal_color, VGA_HEIGHT, i);             
+        }
+        terminal_row = VGA_HEIGHT;
+    }
 }
 
 void terminal_putc(char c) {
@@ -80,6 +95,7 @@ void terminal_putc(char c) {
             terminal_row = 0;
         }
     }
+    terminal_scroll();
 }
 
 static void terminal_write(const char* data, size_t size) {

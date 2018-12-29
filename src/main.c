@@ -2,15 +2,17 @@
 #include "stdio.h"
 
 #if defined(__linux__)
-#error "Please work"
+#error "Need to use cross compiler"
 #endif
 
 #if !defined(__i386__)
-#error "did i do this right"
+#error "Must be x86 cross compiler"
 #endif
 
 int kernel_main(void) {
     terminal_initialize();
-    printf("Hello, kernel world!\nThis is your\nmaster %s %d", "this is a test string", 22);
+    for (int i = 0; ; i++) {
+        printf("num %d\n", i);
+    }
     return 0;
 }
