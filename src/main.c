@@ -1,6 +1,7 @@
 #include "vga.h"
 #include "gdt.h"
 #include "stdio.h"
+#include "idt.h"
 
 #if defined(__linux__)
 #error "Need to use cross compiler"
@@ -12,9 +13,10 @@
 
 int kernel_main(void) {
     gdt_init();
+    idt_init();
     terminal_initialize();
-    for (int i = 0; ; i++) {
-        printf("num %d\n", i);
-    }
+    printf("OK\n");
+	asm volatile("int $0x3");
+    asm volatile("int $0x4");
     return 0;
 }
