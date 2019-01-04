@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define IRQ_OFFSET 32
+
 struct registers {
     uint32_t ds;
     uint32_t edi;
@@ -22,5 +24,9 @@ struct registers {
     uint32_t ss;
 };
 
+typedef void (*isr_t)(struct registers);
+
 void isr_handler(struct registers regs);
+void irq_handler(struct registers regs);
+void register_interrupt_handler(uint8_t index, isr_t handler);
 #endif

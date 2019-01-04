@@ -1,11 +1,36 @@
 #include "pic.h"
+#include "io.h"
 
-// PIC addresses
-#define PIC1 0x20
-#define PIC2 0xA0
-#define PIC1_CMD PIC1
-#define PIC1_DATA (PIC1 + 1)
-#define PIC2_CMD PIC2
-#define PIC2_DATA (PIC2 + 1)
+void pic_send_eoi(uint8_t irq) {
+    if (irq >= 8) {
+        outb(PIC2_CMD, PIC_EOI);
+    }
+    outb(PIC1_CMD, PIC_EOI);
+}
 
-// commands
+void pic_remap(int offset1, int offset2) {
+    uint8_t a1, a2;
+    a1 = inb(PIC1_DATA);
+    a2 = inb(PIC2_DATA);
+
+    outb(PIC1_CMD, ICW1_INIT | ICW1_ICW4);
+    io_wait();
+    outb(PIC2_CMD, ICW1_INIT | ICW1_ICW4);
+    io_wait();
+    outb(PIC1_DATA, offset1);
+    io_wait();
+    outb(PIC2_DATA, offset2);
+    io_wait();
+    outb(PIC1_DATA, 4);
+    io_wait();
+    outb(PIC2_DATA, 2);
+    io_wait();
+    
+    outb(PIC1_DATA, ICW4_8086);
+    io_wait();
+    outb(PIC2_DATA, ICW4_8086);
+    io_wait();
+
+    outb(PIC1_DATA, a1);
+    outb(PIC2_DATA, a2);
+}
