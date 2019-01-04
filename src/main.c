@@ -18,8 +18,12 @@ int kernel_main(void) {
     idt_init();
     terminal_initialize();
     interrupts_init();
+    timer_init(500);
     printf("All init\n");
-    //asm volatile("sti");
-    timer_init(50);
+    /*
+    asm volatile("int $0x21");
+    asm volatile("int $0x20");
+    asm volatile("int $0x2F");
+    */
     return 0;
 }
