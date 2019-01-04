@@ -27,7 +27,7 @@ struct registers {
 typedef void (*isr_t)(struct registers);
 
 void interrupts_init(void);
-void isr_handler(struct registers regs);
-void irq_handler(struct registers regs);
+void irq_set_mask(uint8_t num);
+void irq_clear_mask(uint8_t line);
 void register_interrupt_handler(uint8_t index, isr_t handler);
 #endif

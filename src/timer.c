@@ -2,6 +2,7 @@
 #include "isr.h"
 #include "stdio.h"
 #include "io.h"
+#include "pic.h"
 
 #define TIMER_BASE_FREQ (1193180U)
 #define TIMER_CMD_PORT (0x43)
@@ -19,6 +20,7 @@ static void timer_callback(struct registers regs) {
 void timer_init(uint32_t frequency) {
     tick = 0;
 
+    pic_clear_irq_mask(0);
     register_interrupt_handler(32, &timer_callback);
 
     outb(TIMER_CMD_PORT, TIMER_REPEAT_MODE);

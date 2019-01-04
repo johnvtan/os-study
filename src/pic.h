@@ -27,4 +27,6 @@
 
 void pic_send_eoi(uint8_t irq);
 void pic_remap(int offset1, int offset2);
+void pic_set_irq_mask(uint8_t num);
+void pic_clear_irq_mask(uint8_t num);
 #endif

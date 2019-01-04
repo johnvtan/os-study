@@ -34,3 +34,15 @@ void pic_remap(int offset1, int offset2) {
     outb(PIC1_DATA, a1);
     outb(PIC2_DATA, a2);
 }
+
+void pic_set_irq_mask(uint8_t num) {
+    uint16_t port = num < 8 ? PIC1_DATA : PIC2_DATA;
+    uint8_t value = inb(port) | (1 << num);
+    outb(port, value);
+}
+
+void pic_clear_irq_mask(uint8_t num) {
+    uint16_t port = num < 8 ? PIC1_DATA : PIC2_DATA;
+    uint8_t value = inb(port) & ~(1 << num);
+    outb(port, value);
+}
