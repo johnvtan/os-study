@@ -24,7 +24,6 @@ irq\irq_num:
     jmp irq_common_stub
 .endm
 
-
 isr_common_stub:
     pusha
     mov %ds, %ax
