@@ -24,5 +24,5 @@ SECTIONS
         *(.bss)
     }
 
-    end = .;
+    __end = .;
 }
