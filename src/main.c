@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "isr.h"
 #include "paging.h"
+#include "panic.h"
 
 #if defined(__linux__)
 #error "Need to use cross compiler"
@@ -19,12 +20,12 @@ int kernel_main(void) {
     idt_init();
     terminal_initialize();
     printf("cool\n");
-    interrupts_init();
+    //interrupts_init();
     paging_init();
-    asm volatile("sti");
     //timer_init(100);
     printf("All init\n");
     uint32_t *ptr = (uint32_t*)0xA0000000; 
     uint32_t do_page_fault = *ptr;
+    PANIC("end of kernel\n");
     return 0;
 }

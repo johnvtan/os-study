@@ -1,11 +1,10 @@
 #include "paging.h"
 #include "panic.h"
 #include "kheap.h"
-#include "strings.h"
+#include "strings.h" 
 #include "stdio.h"
 
-static uint32_t *frames;
-static uint32_t num_frames;
+static uint32_t *frames; static uint32_t num_frames;
 
 static struct page_directory *kernel_directory;
 static struct page_directory *current_directory;
@@ -84,15 +83,21 @@ void paging_init(void) {
     uint32_t mem_end_page = 0x10000000;
     num_frames = mem_end_page / 0x1000;
 
-    printf("here?\n");
     // allocate memory for page bitmap
-    uint32_t bitmap_size = INDEX_FROM_BIT(num_frames);
-    frames = (uint32_t *)kmalloc(bitmap_size);
-    memset(frames, 0, bitmap_size);
+    //uint32_t bitmap_size = INDEX_FROM_BIT(num_frames);
+    frames = (uint32_t *)kmalloc(INDEX_FROM_BIT(num_frames));
+    printf("after first malloc\n");
+    //memset(frames, 0, INDEX_FROM_BIT(num_frames));
+    for (int i = 0; i < INDEX_FROM_BIT(num_frames); i++) {
+        printf("%u: %u\n", i, frames[i]);
+    }
+    printf("after memset\n");
 
     // allocate memory from kernel page directory
     kernel_directory = (struct page_directory *)kmalloc_a(sizeof(struct page_directory));
+    printf("after second malloc\n");
     memset(kernel_directory, 0, sizeof(struct page_directory));
+    printf("after second memset\n");
     current_directory = kernel_directory;
 
     printf("here\n");
@@ -112,7 +117,7 @@ void switch_page_directory(struct page_directory *dir) {
     current_directory = dir;
     asm volatile("mov %0, %%cr3" :: "r"(&dir->tables_physical));
     uint32_t cr0;
-    asm volatile("mov %%cr0, %0" :: "r"(cr0));
+    asm volatile("mov %%cr0, %0" : "=r"(cr0));
     cr0 |= 0x80000000;
     asm volatile("mov %0, %%cr0" :: "r"(cr0));
 }
@@ -124,6 +129,7 @@ struct page *get_page(uint32_t address, int make_new, struct page_directory *dir
     uint32_t table_idx = address / 1024;
     if (dir->tables[table_idx]) {
         // page table already exists, return that page
+        printf("exists\n");
         return &(dir->tables[table_idx]->pages[address % 1024]);
     } else if (make_new) {
         // allocate memory for new page table and zero it out
