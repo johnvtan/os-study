@@ -19,13 +19,15 @@ int kernel_main(void) {
     gdt_init();
     idt_init();
     terminal_initialize();
-    printf("cool\n");
-    //interrupts_init();
-    paging_init();
-    //timer_init(100);
+    interrupts_init();
+    //paging_init();
+    timer_init(100);
     printf("All init\n");
-    uint32_t *ptr = (uint32_t*)0xA0000000; 
-    uint32_t do_page_fault = *ptr;
-    PANIC("end of kernel\n");
+    for (;;) {
+        asm volatile("hlt");
+    }
+    //uint32_t *ptr = (uint32_t*)0xA0000000; 
+    //uint32_t do_page_fault = *ptr;
+    //PANIC("end of kernel\n");
     return 0;
 }
