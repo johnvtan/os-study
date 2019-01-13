@@ -3,9 +3,7 @@
 #include "kheap.h"
 #include "strings.h" 
 #include "stdio.h"
-
-static uint32_t *frames; static uint32_t num_frames;
-
+static uint32_t *frames; static uint32_t num_frames; 
 static struct page_directory *kernel_directory;
 static struct page_directory *current_directory;
 
@@ -84,32 +82,22 @@ void paging_init(void) {
     num_frames = mem_end_page / 0x1000;
 
     // allocate memory for page bitmap
-    //uint32_t bitmap_size = INDEX_FROM_BIT(num_frames);
-    frames = (uint32_t *)kmalloc(INDEX_FROM_BIT(num_frames));
-    printf("after first malloc\n");
-    //memset(frames, 0, INDEX_FROM_BIT(num_frames));
-    for (int i = 0; i < INDEX_FROM_BIT(num_frames); i++) {
-        printf("%u: %u\n", i, frames[i]);
-    }
-    printf("after memset\n");
-
+    uint32_t bitmap_size = INDEX_FROM_BIT(num_frames);
+    frames = (uint32_t *)kmalloc(bitmap_size);
+    memset(frames, 0, bitmap_size);
+    
     // allocate memory from kernel page directory
     kernel_directory = (struct page_directory *)kmalloc_a(sizeof(struct page_directory));
-    printf("after second malloc\n");
     memset(kernel_directory, 0, sizeof(struct page_directory));
-    printf("after second memset\n");
     current_directory = kernel_directory;
 
-    printf("here\n");
     uint32_t i = 0;
     while (i < placement_address) {
-        alloc_frame(get_page(i, 1, kernel_directory), 1, 0);
+        alloc_frame(get_page(i, 1, kernel_directory), 0, 0);
         i += 0x1000;
     }
-    printf("oops\n");
 
     register_interrupt_handler(14, page_fault);
-    printf("pls\n");
     switch_page_directory(kernel_directory);
 } 
 
@@ -124,19 +112,16 @@ void switch_page_directory(struct page_directory *dir) {
 
 struct page *get_page(uint32_t address, int make_new, struct page_directory *dir) {
     address /= 0x1000;
-
-    // I think this is already in virtual address space
     uint32_t table_idx = address / 1024;
     if (dir->tables[table_idx]) {
         // page table already exists, return that page
-        printf("exists\n");
-        return &(dir->tables[table_idx]->pages[address % 1024]);
+        return (&dir->tables[table_idx]->pages[address % 1024]);
     } else if (make_new) {
         // allocate memory for new page table and zero it out
         uint32_t temp;
         dir->tables[table_idx] = (struct page_table*)kmalloc_ap(sizeof(struct page_table), &temp);
-        memset(dir->tables[table_idx], 0, sizeof(struct page_table));
-        return &(dir->tables[table_idx]->pages[address % 1024]);
+        dir->tables_physical[table_idx] = temp | 0x7; // PRESENT, RW, US
+        return (&dir->tables[table_idx]->pages[address % 1024]);
     } else {
         return 0;
     }

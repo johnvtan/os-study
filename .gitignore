@@ -4,3 +4,4 @@
 *.swp
 *.bin
 bochslog.txt
+.gdb_history

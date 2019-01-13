@@ -3,7 +3,7 @@ ARCH = i686-elf
 CC = $(PREFIX)/$(ARCH)-gcc
 AS = $(PREFIX)/$(ARCH)-as
 
-CFLAGS = -ffreestanding -Wall -Wextra
+CFLAGS = -ffreestanding -Wall -Wextra -g -O0
 LDFLAGS = -T linker.ld -ffreestanding -nostdlib -lgcc
 ASFLAGS =
 

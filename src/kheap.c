@@ -1,21 +1,22 @@
 #include "kheap.h"
 #include "stdio.h"
+#include "strings.h"
 
 extern uint32_t __end;
 uint32_t placement_address = (uint32_t)&__end;
 
 static void *kmalloc_internal(uint32_t size, int align, uint32_t *phys) {
-    printf("internal\n");
-    if (align == 1 && (placement_address & 0xFFFF0000)) {
-        placement_address &= 0xFFFF0000;
+    if (align == 1 && (placement_address & 0xFFFFF000)) {
+        placement_address &= 0xFFFFF000;
         placement_address += 0x1000;
     }
     if (phys) {
         *phys = placement_address;
     }
+    // zero out memory before returning it always
+    memset((void*)placement_address, 0, size);
     uint32_t rv = placement_address;
     placement_address += size;
-    printf("I should be good\n");
     return (void*)rv;
 }
 
@@ -33,7 +34,5 @@ void *kmalloc_ap(uint32_t size, uint32_t *phys) {
 }
 
 void *kmalloc(uint32_t size) {
-    void *rv = kmalloc_internal(size, 0, 0);
-    printf("done\n");
-    return rv;
+    return kmalloc_internal(size, 0, 0);
 }
